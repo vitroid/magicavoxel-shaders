@@ -1,6 +1,6 @@
 // -*- c -*-
 // console commands
-// 'xs arch2'
+// 'xs xex'
 
 // shader inputs
 // uniform vec3		iVolumeSize;	// volume size [1-126]
@@ -21,23 +21,23 @@
 // float voxel( vec3 v );			// get voxel color index at position v
 
 
-float cosh( float x )
-{
-	return (exp(x)+exp(-x))/2.0;
-}
+
+// expand the body along x axis.
 
 
-// Make a catenary arch.
 float map( vec3 v ) {
-    float hx = cosh(v.x / 5.0 );
-    float hy = cosh(v.y / 5.0 );
-    vec3  R  = v;
-    R.z = 0.0;
-    float r  = length(R); 
-    float mx = cosh((iVolumeSize.x + v.x) / (iVolumeSize.x/2.0) );
-    float my = cosh((iVolumeSize.y + v.y) / (iVolumeSize.y/2.0) );
-    float h  = min(mx,my); //, mx), my);
-
-	// inside sphere
-    return iColorIndex * step( v.z/iVolumeSize.z*40.0, h );
+  float P = iColorIndex;
+  float C = voxel(v);
+  if (C == 0.0){
+    float xp = voxel(vec3(v.x+1.0, v.y, v.z));
+    if ( xp > 0.0 ){
+      return P;
+    }
+    float xn = voxel(vec3(v.x-1.0, v.y, v.z));
+    if ( xn > 0.0 ){
+      return P;
+    }
+    return 0.0;
+  }
+  return C;
 }

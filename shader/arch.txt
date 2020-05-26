@@ -26,7 +26,7 @@ float cosh( float x )
 }
 
 
-// generate new voxel color index at position v
+// make a catenary arch.
 float map( vec3 v ) {
 	float hx = cosh(v.x / 5.0 );
 	float hy = cosh(v.y / 5.0 );
