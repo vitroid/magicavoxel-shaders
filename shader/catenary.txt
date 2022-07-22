@@ -1,0 +1,85 @@
+// -*- c -*-
+// console commands
+// 'xs mand [n]' : e.g. 'xs mand 8'
+
+// shader inputs
+// uniform vec3		iVolumeSize;	// volume size [1-126]
+// uniform float	iColorIndex;	// current color index [1-255]
+// uniform vec3		iMirror;		// current mirror mode [0-1]
+// uniform vec3		iAxis;			// current axis mode [0-1]
+
+// uniform float	iFrame;			// current anim frame index
+// uniform float	iNumFrames;		// total num of anim frames
+
+// uniform float	iIter;			// current iteration index
+
+// uniform vec4		iRand;			// random number
+
+// uniform float	iArgs[8];		// user args
+
+// built-in functions
+// float voxel( vec3 v );			// get voxel color index at position v
+
+
+float cosh( float x )
+{
+	return (exp(x)+exp(-x))/2.0 - 1.0;
+}
+
+
+// generate new voxel color index at position v
+float map( vec3 v ) {
+  float hx = iVolumeSize.x / 2.0;
+  float hy = iVolumeSize.y / 2.0;
+  float scale = 8.9;
+
+  float xyslice = 0.0;
+  float zslice = 0.0;
+  if (iVolumeSize.x < iVolumeSize.y){
+    xyslice = step( (v.x-1.0)*(iVolumeSize.y-1.0), v.y*(iVolumeSize.x-1.0) ) *
+                    step(-(v.x)*(iVolumeSize.y-1.0),-v.y*(iVolumeSize.x-1.0) );
+    float h = cosh((v.y - hy)*scale / iVolumeSize.y );
+    float hp = cosh((v.y+1.0 - hy)*scale / iVolumeSize.y );
+    float hm = cosh((v.y-1.0 - hy)*scale / iVolumeSize.y );
+    float l = min(hp, hm);
+    h = h / 40.0 * iVolumeSize.z + 1.0;
+    l = l / 40.0 * iVolumeSize.z + 1.0;
+    if ( l + 1.0 > h){
+      l = h - 1.0;
+    }
+    zslice  = step( v.z, h ) *
+              step( -v.z, -l );
+  }
+  else if (iVolumeSize.x == iVolumeSize.y){
+    xyslice = step( (v.x)*(iVolumeSize.y-1.0), v.y*(iVolumeSize.x-1.0) ) *
+                    step(-(v.x+0.9)*(iVolumeSize.y-1.0),-v.y*(iVolumeSize.x-1.0) );
+    float h = cosh((v.y - hy)*scale / iVolumeSize.y );
+    float hp = cosh((v.y+1.0 - hy)*scale / iVolumeSize.y );
+    float hm = cosh((v.y-1.0 - hy)*scale / iVolumeSize.y );
+    float l = min(hp, hm);
+    h = h / 40.0 * iVolumeSize.z + 1.0;
+    l = l / 40.0 * iVolumeSize.z + 1.0;
+    if ( l + 1.0 > h){
+      l = h - 1.0;
+    }
+    zslice  = step( v.z, h ) *
+              step( -v.z, -l );
+  }
+  else{
+    xyslice = step( v.x*(iVolumeSize.y-1.0), v.y*(iVolumeSize.x-1.0) ) *
+                    step(-v.x*(iVolumeSize.y-1.0),-(v.y-1.0)*(iVolumeSize.x-1.0) );
+    float h = cosh((v.x - hx)*scale / iVolumeSize.x );
+    float hp = cosh((v.x+1.0 - hx)*scale / iVolumeSize.x );
+    float hm = cosh((v.x-1.0 - hx)*scale / iVolumeSize.x );
+    float l = min(hp, hm);
+    h = h / 40.0 * iVolumeSize.z + 1.0;
+    l = l / 40.0 * iVolumeSize.z + 1.0;
+    if ( l + 1.0 > h){
+      l = h - 1.0;
+    }
+    zslice  = step( v.z, h ) *
+              step( -v.z, -l );
+  }
+// inside sphere
+  return iColorIndex * xyslice * zslice;
+}

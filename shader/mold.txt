@@ -29,7 +29,7 @@ float map( vec3 v ) {
   float h   = iArgs[0];
   float pal = iColorIndex;
   float O   = voxel(v);
-  if (v.z != h){
+  if ((v.z <= h) || (h+1.0 < v.z)){
     return O;
   }
   else{
@@ -46,5 +46,6 @@ float map( vec3 v ) {
       }
       return 0.0;
     }
+    return O;
   }
 }
